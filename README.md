@@ -20,7 +20,7 @@ The goal is to build a binary classifier to predict the “PreventiveFlag” lab
 Class 0 stats: 
 ![**Figure 2. **](graphics/class0_stats.png)
 Class 1 stats: 
-![**Figure 3. **](graphics/class0_stats.png)
+![**Figure 3. **](graphics/class1_stats.png)
 
 ### Text Analysis
 
