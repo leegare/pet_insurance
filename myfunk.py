@@ -180,7 +180,7 @@ def text_analysis(i_desc):
     idesc = join_measurements(idesc)
     # Lower case: necessary to lemmatizing
     # Case examples: id 4013 with 9.9-22lb/4.5-10kg
-    # # text_analysis: 
+    # # text_analysis:
     #     consider removing dates for i.e.:
     # data.loc[data.index.isin([7295,9815]),['Diagnosis']]
     return idesc.lower()
@@ -294,21 +294,23 @@ def preprocessing(df, flag=0):
     return df.ItemDescription.values + " " + df.Diagnosis.values
 
 def vectorize(train, corpus_all, vectorizer_count, vectorizer_tf, n):
-
+    # Transforms text into a sparse matrix of n-gram counts.
     if train:
         analyzer = CountVectorizer(stop_words='english', token_pattern='[a-zA-Z]{2,}').build_analyzer()  # Added
-        vectorizer_count = CountVectorizer(ngram_range=(1,n))
+        vectorizer_count = CountVectorizer(ngram_range=(1,n), analyzer=analyzer)
         one_hot = vectorizer_count.fit_transform(corpus_all)
     else:
         vectorizer_count._validate_vocabulary()
         one_hot = vectorizer_count.transform(corpus_all)
 
 
+    # Transform a count matrix to a normalized tf or tf-idf representation:
+
     # TFIDF
     # Term frequency: this summarizes how often a given word appears within a document
     # Inverse document frequency: This downscales words that appear a lot across documents
     # Transforming the matrix based on the learnt frequencies or weights
-    # vectorizer_tf.idf_
+
 
     if train:
         vectorizer_tf = TfidfTransformer()
@@ -445,3 +447,125 @@ def get_metrics(df, y, yp, ind_name):
                             'F1_C1':round(d_f1[1],3),
                             'AUC':d_roc,
                             'MSE':d_mse}, index=[ind_name])])
+
+
+### Plotting functions
+
+def compare_2_classifiers(dt_config, rf_config):
+    # Compare to experiments
+
+    dt_config['Phase'][2] = "Tr-clfX"
+    dt_config['Phase'][3] = "Val-clfX"
+    rf_config['Phase'][2] = "Tr-clfX"
+    rf_config['Phase'][3] = "Val-clfX"
+
+    model_c = pd.concat([dt_config,rf_config]).sort_index()#values('MSE')
+
+    f, axes = plt.subplots(nrows = 4, ncols = 2, figsize=(20,34))
+    barWidth = 0.35
+    cols = ['MSE', 'AUC', 'F1_C0', 'F1_C1', 'Prec_C0', 'Prec_C1','Recal_C0', 'Recal_C1']
+    plot_comparisson_metrics(f,axes, model_c, cols, barWidth)
+    f.savefig(path+'/graphics/comparissonMetricsRFvsDT.png', dpi=f.dpi)
+
+    f1, axes = plt.subplots(nrows = 4, ncols = 2, figsize=(20,34))
+    comparisson_clfs(f1,axes, model_c, cols, barWidth)
+    f1.savefig(path+'/graphics/comparissonRFvsDT.png', dpi=f.dpi)
+    
+def plot_comparisson_metrics(f,axes, model_c, cols, barWidth):
+    axes = axes.ravel()
+
+    for idx, ax in enumerate(axes):
+
+        bar1 = model_c.loc[model_c.db_size=='(7000, 4700)', cols[idx]].values
+        bar2 = model_c.loc[model_c.db_size=='(7000, 4853)', cols[idx]].values
+        # Set position of bar on X axis
+        r1 = np.arange(len(bar1))
+        r2 = [x + barWidth for x in r1]
+
+        # Make the plot
+        ax.barh(r1, bar1, color='royalblue', height=barWidth,  label='4700 feats')
+        ax.barh(r2, bar2, color='coral', height=barWidth, label='4853 feats')
+
+        for idx2,i in enumerate(ax.patches):
+
+            if idx2 >= 8:
+                colr = 'royalblue'
+            else:
+                colr = 'gold'
+
+            if idx == 0: # MSE
+                x0 = i.get_width()+.02
+                leg_loc = 'upper right'
+                colr = 'black'
+            else:
+                x0 = i.get_width()-.1
+                leg_loc = 'upper left'
+
+
+            ax.text(x0, i.get_y(), \
+                str(round(i.get_width(),3)), fontsize=16, color=colr)
+
+
+
+        # Add xticks on the middle of the group bars
+        ax.grid()
+        if idx%2==0:
+            ax.set_yticks([r + barWidth for r in range(len(bar1))])
+            ax.set_yticklabels(model_c.Phase.unique())
+            ax.legend(loc=leg_loc, fontsize=18)
+        else:
+            ax.get_yaxis().set_ticks([])
+        # Create legend & Show graphic
+        ax.set_title(cols[idx], fontsize=20)
+        ax.set_xticks(np.linspace(0, 1, num=6))
+
+    plt.show()
+
+def comparisson_clfs(f,axes, model_c, cols, barWidth):
+    axes = axes.ravel()
+    phases = model_c.Phase.unique()
+
+    for idx, ax in enumerate(axes):
+
+
+        bar1 = model_c.loc[(model_c.db_size=='(7000, 4700)')&(model_c.Phase==phases[idx]), cols].values[0]
+        bar2 = model_c.loc[(model_c.db_size=='(7000, 4853)')&(model_c.Phase==phases[idx]), cols].values[0]
+        # Set position of bar on X axis
+        r1 = np.arange(len(bar1))
+        r2 = [x + barWidth for x in r1]
+
+        # Make the plot
+        ax.barh(r1, bar1, color='royalblue', height=barWidth,  label='4700 feats')
+        ax.barh(r2, bar2, color='coral', height=barWidth, label='4853 feats')
+
+        for idx2,i in enumerate(ax.patches):
+
+    #         if idx == 0: # MSE
+    #             x0 = i.get_width()-.02
+    #             leg_loc = 'upper right'
+    #         else:
+            x0 = i.get_width()-.1
+            leg_loc = 'upper left'
+
+            if idx2 >= 8:
+                colr = 'royalblue'
+            else:
+                colr = 'gold'
+
+            ax.text(x0, i.get_y(), \
+                str(round(i.get_width(),3)), fontsize=16, color=colr)
+
+
+        # Add xticks on the middle of the group bars
+        ax.grid()
+        if idx%2==0:
+            ax.set_yticks([r + barWidth for r in range(len(bar1))])
+            ax.set_yticklabels(cols)
+            ax.legend(loc=leg_loc, fontsize=18)
+        else:
+            ax.get_yaxis().set_ticks([])
+        ax.set_xticks(np.linspace(0, 1, num=6))
+        # Create legend & Show graphic
+        ax.set_title(phases[idx], fontsize=20)
+
+    plt.show()

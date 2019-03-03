@@ -17,8 +17,11 @@ The goal is to build a binary classifier to predict the “PreventiveFlag” lab
 --- 
 Class 0 stats: 
 ![**Figure 2. **](graphics/class0_stats.png)
+Class 0 Item descritpion fields have a normal like distribution The diagnosis however has a few outliers with a character length exceeding 200 Some with over more than 6 sentences and words above 50 count.
+
 Class 1 stats: 
 ![**Figure 3. **](graphics/class1_stats.png)
+Class 1 Char count: Diagnosis has an outlier with more than 800 characters in length Must be the one having over 10 sentences and 170 words Let's see which instances have a diagnosis word count of more than 30 On the ItemDescription side the fields seem to have in average 6 words and no more than 50 characters
 
 ### Text Analysis
 
@@ -30,4 +33,19 @@ I've selected 3 Models based on their performance with their stratified datasets
 3. SVM with SGD deals with the 76% of the class 0 samples 
 
 ![**Figure 3. **](graphics/SetWithDT_stats.png)
+
+## Results: 
+
+![**Figure 4. **](graphics/comparissonMetricsRFvsDT.png)
+DT shows the highest c1 recall (0.884) but c1 precision is the lowest (34%) and RF's c1 precision is 51% (signs of **overfitting**), however 
+Voting soft with DT yields a higher C1 recall (0.875), voting hard favores DT too. 
+Also Voting Soft shows the maximum value for AUC with DT. 
+An important note is that SGD trains really badly the c1 samples (only 30%) but regularizes well and jumps to 58% with DT and with RF at 66%
+
+![**Figure 5. **](graphics/comparissonRFvsDT.png)
+RF beats dt in terms of c1's precision and the recall difference is not that much. But when it comes to voting soft DT beats RF in AUC (0.916) and c1 precision but RF wins in the same extent in c1 recall
+In voting hard DT beats RF in AUC (0.871) as well as c1's recall and precision. 
+In conclusion DT shows better results. 
+
+
 
