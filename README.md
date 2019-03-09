@@ -142,8 +142,8 @@ fig.savefig(path+'/graphics/TrainValRoCurve.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/TrainValRoCurve.png)
 
-From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfittng
-
+From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfitting. 
+Joining the validation set with the training set (to get the maximum samples possible) augmented the average precision by 0.01
 ---
 ### 9. Conclusion
 
