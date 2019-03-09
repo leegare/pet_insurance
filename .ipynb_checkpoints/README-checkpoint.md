@@ -49,7 +49,7 @@ stats_class(data, f, axarr, 0.0)
 f.savefig(path+'/graphics/class0_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/class0_stats.png)
-Class 0 Item descritpion fields have a normal like distribution. The diagnosis field however has a few outliers with a character length exceeding 200. Some with over more than 6 sentences and words above 50 count. They seem however to affect the prediction positively, so I will keep them. 
+Class 0 Item descritpion fields have a normal like distribution. The diagnosis field however has a few outliers with a character length exceeding 200. Some with over more than 6 sentences and words above 50 count. They seem to affect the prediction negatively, so I will remove them.
 
 #### Statistics for the whole dataset
 ```python
