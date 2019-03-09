@@ -92,6 +92,12 @@ def m_preprocess(data, f, test):
     # Remove contradictions (specific case)
     data = data.loc[~data.index.isin([7850, 7861])]
 
+    # Remove outliers
+    c0 = data.loc[data.PreventiveFlag==0.0]
+    c0d_lengths = [len(item[1].Diagnosis) for item in c0.iterrows()]
+    outliers = c0.iloc[np.where(np.array(c0d_lengths) > 200)].index
+    data = data.loc[~(data.index.isin(outliers))]
+
     print('Preprocessing...')
     data_features, data = preprocess(data, f) ## --- Preprocessing: ~ 17s
 
