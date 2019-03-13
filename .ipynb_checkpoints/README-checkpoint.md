@@ -1,36 +1,40 @@
-# pet_insurance
-NLP analysis and classification of a dataset of claims
-
-
+# NLP analysis and classification of a dataset of claims
 ---
-## Build a text classifier
+### Goal
 
 Description:
-- Our product does not cover routine, wellness or preventive care. 
-- We believe that costs that pet owners can expect periodically and budget for should be separate from an insurance policy meant to cover accidents and illnesses.
 - Use the data contained in p2_data.csv to build a binary classifier to predict the “PreventiveFlag” label using the text features provided. 
 - This model can be used to automate the detection of ineligible line items. 
-- The expected output are prediction probabilities for rows 10001 through 11000, where the labels are currently null.
 
+### Files: 
+- The data folder has the csv files provided by source. 
+- The graphics folder contains the charts and images used for the analysis. 
+- The results folder holds 2 csv files: 
+    - One with the prediction of the test set and 
+    - The second one has the performance metrics performed by the baseline of classifiers through different parameters. 
+- The python file "myfunk" has the functions used in the analysis. 
+- The jupyter notebook is divided in:
+    1. Importing customized functions and Loading Data
+    2. Exploratory Data Analysis
+    3. Experiment Analysis
+    4. Definition of variables
+    5. Comparisson of the baseline vs tuned models
+    6. Training and Validation
+    7. Results
+    8. Prediction of the test set 
+    9. Conclusion
 
-#### The notebook is divided in:
+    - It's a sequential notebook (Each cell should to be run in order). However the 8th block (Prediction of the test set) can be run after blocks #1 and #4.  
 
-1. Importing customized functions and Loading Data
-2. Exploratory Data Analysis
-3. Experiment Analysis
-4. Definition of variables
-5. Comparisson of the baseline vs tuned models
-6. Training and Validation
-7. Results
-8. Prediction of the test set 
-9. Conclusion
+---
+### 1. Dataset and EDA
 
-It is a sequential notebook (Each cell should to be run in order). However the 8th block (Prediction of the test set) can be run after blocks 1 and 4.   
+The dataset is composed of 11,000 rows and 3 columns where 2 are of type text and the 3rd is the target represented in float values of 0.0 and 1.0 as shown below: 
+![**Figure. **](graphics/dataframe.png)
 
-Aside from this notebook and a python file with the functions used in this study, I've included 3 folders in this root folder: 
-1. Data: Contains the given csv files. 
-2. Graphics: Holds the images and graphs included in thiss study
-3. Results: Has the predictions of the test set in a csv file along with another csv file with the experiments results. 
+An initial analysis showed the dataset to be composed of: 
+- 4541 different words, numbers and symbols in the Item Description column and 
+- 2029 different words, numbers and symbols in the Diagnosis column. 
 
 #### Statistics for samples of class 1
 
@@ -49,7 +53,7 @@ stats_class(data, f, axarr, 0.0)
 f.savefig(path+'/graphics/class0_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/class0_stats.png)
-Class 0 Item descritpion fields have a normal like distribution. The diagnosis field however has a few outliers with a character length exceeding 200. Some with over more than 6 sentences and words above 50 count. They seem to affect the prediction negatively, so I will remove them.
+In the Item descritpion field for class 0 (top row), have a normal like distribution. The diagnosis field however has a few outliers with a character length exceeding 200. Some with over more than 6 sentences and words above 50 count. They proved later to affect the prediction negatively, so I removed them.
 
 #### Statistics for the whole dataset
 ```python
@@ -59,16 +63,19 @@ f.savefig(path+'/graphics/dataset_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/dataset_stats.png)
 
-### 3. Experiment Analysis
+An unpaired t-test between the 2 classes' distributions asserted that there is no significant difference. 
 
-As a preprocessing step the item descriptions and the diagnosis were blended and tokenized. I also remmoved some duplicated instances along with a couple of duplicated instances with different preventive flag values which I called contradictions and would act as noise for the classification. 
+---
+### 2. Experiment Analysis
+
+As a preprocessing step the item descriptions and the diagnosis were merged and tokenized. I also remmoved some duplicated instances along with a couple of duplicated instances with different preventive flag values which I called contradictions and would act as noise for the classification. 
 Another factor that wasn't relevant to the prediction was the pet name on the item's description. 
 
-After text cleaning and removing stop words, there was over 6.3 thousand words to work with!
+After text cleaning and removing stop words, there were over 6.3 thousand words to work with!
 
-The next steps include feature engineering. I converted the text corpus to a matrix of token counts (using CountVectorizer), then transform a count matrix to a normalized tf-idf representation (with tf-idf transformer). I used as feature selection method the chi-square test since it measures dependence between stochastic variables, so using this function “weeds out” the features that are the most likely to be independent of class and therefore irrelevant for classification.
+The next step included feature engineering. I converted the text corpus into a matrix of token counts (using CountVectorizer), then transformed it into a normalized tf-idf representation (with tf-idf transformer). I used as feature selection method the chi-square test since it measures dependence between stochastic variables, so using this function “weeds out” the features that are the most likely to be independent of class and therefore irrelevant for classification.
 
-After that, I did a series of tests by training several classifiers from Scikit-Learn library (with default parameters)over different number of features, ngrams and the options of stemming (in this case), lemmatizing or both. The decision on whether to stem or not came from the fact that stemming gave higher performance scores. The training and validation splitting ratio was 70%:30% and the performance metric is the area under the curve (AUC) since it tells how much model is capable of distinguishing between classes and accuracy cannot show a reliable score due to the fact that the dataset is imbalanced. 
+After that, I did a series of tests by training several classifiers from Scikit-Learn library (with default parameters) over different number of features, n-grams, stemming, lemmatizing or both. The decision on whether to stem or not came from the fact that stemming gave higher performance scores. The training and validation splitting ratio was 70%:30% and the performance metric is the area under the curve (AUC) since it tells how much model is capable of distinguishing between classes and accuracy cannot show a reliable score due to the fact that the dataset is imbalanced. 
 
 Python code to reproduce this figure:
 ```python
@@ -107,7 +114,7 @@ The figure (above) shows the AUC score over the number of features and the red l
 The best nFeats value came out to be 3550. I did another test but this time with a training/validation split of 80%:20% (a rule of thumb) and the model yield a higher score for 4200 features.
 
 ---
-### 5. Baseline vs Tuned models
+### 3. Baseline vs Tuned models
 
 
 The figure below shows the score comparison between the selected classifiers (exp1) with default parameters vs with tuned parameters (exp2): 
@@ -132,8 +139,7 @@ fig.savefig(path+'/graphics/baselineVsOptimized.png', dpi=fig.dpi)
 There's an improvement on the AUC score of 1% using the tuned classifiers. 
 
 ---
-
-### 7. Results
+### 4. Results
 
 ```python
 fig, axarr = plt.subplots(1,2,figsize=(15,4))
@@ -142,9 +148,12 @@ fig.savefig(path+'/graphics/TrainValRoCurve.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/TrainValRoCurve.png)
 
-From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfittng
+From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfitting. 
+Joining the validation set with the training set (to get the maximum samples possible) augmented the average precision by 0.01
 
 ---
-### 9. Conclusion
+### 5. Conclusion and future work
 
-The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. To compensate the class imbalance, I would have considered including more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check out the option of finding Word2vecs that could be clustered in each class. 
+The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. To compensate the class imbalance, I attempted to ensemble different resampled datasets. This consisted in dividing the instances of class 1 in 3 unequal segments where each segment would be concatenated with all of the class 0 (the minority) instances and assign a classifyier to them. However that didnt improve the baseline's score. Another option could have been to include more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check the option of finding Word2vecs that could be clustered for each class. 
+
+On another note, the duplicates affected positively in the classification. In the dataset with (said) outliers and duplicates, the validation score showed the highest AUC as well as the rest of the metrics. However in the final classification where the validation set is merged with the training data, the removal of outliers showed to have the highest AUC score and the recall of the minority class. 
