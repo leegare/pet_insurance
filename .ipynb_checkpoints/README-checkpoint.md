@@ -24,12 +24,14 @@ Description:
     8. Prediction of the test set 
     9. Conclusion
 
+
     - It's a sequential notebook (Each cell should to be run in order). However the 8th block (Prediction of the test set) can be run after blocks #1 and #4.  
 
 ---
 ### 1. Dataset and EDA
 
 The dataset is composed of 11,000 rows and 3 columns where 2 are of type text and the 3rd is the target represented in float values of 0.0 and 1.0 as shown below: 
+
 ![**Figure. **](graphics/dataframe.png)
 
 An initial analysis showed the dataset to be composed of: 
