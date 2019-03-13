@@ -1,19 +1,12 @@
-# pet_insurance
-NLP analysis and classification of a dataset of claims
-
-
+# NLP analysis and classification of a dataset of claims
 ---
-## Build a text classifier
+### Goal
 
 Description:
-- Our product does not cover routine, wellness or preventive care. 
-- We believe that costs that pet owners can expect periodically and budget for should be separate from an insurance policy meant to cover accidents and illnesses.
 - Use the data contained in p2_data.csv to build a binary classifier to predict the “PreventiveFlag” label using the text features provided. 
 - This model can be used to automate the detection of ineligible line items. 
-- The expected output are prediction probabilities for rows 10001 through 11000, where the labels are currently null.
 
-
-#### The notebook is divided in:
+#### The jupyter notebook is divided in:
 
 1. Importing customized functions and Loading Data
 2. Exploratory Data Analysis
@@ -25,13 +18,15 @@ Description:
 8. Prediction of the test set 
 9. Conclusion
 
-It is a sequential notebook (Each cell should to be run in order). However the 8th block (Prediction of the test set) can be run after blocks 1 and 4.   
+It's a sequential notebook (Each cell should to be run in order). However the 8th block (Prediction of the test set) can be run after blocks #1 and #4.   
 
 Aside from this notebook and a python file with the functions used in this study, I've included 3 folders in this root folder: 
 1. Data: Contains the given csv files. 
 2. Graphics: Holds the images and graphs included in thiss study
 3. Results: Has the predictions of the test set in a csv file along with another csv file with the experiments results. 
 
+---
+### 1. EDA
 #### Statistics for samples of class 1
 
 ```python
@@ -59,7 +54,8 @@ f.savefig(path+'/graphics/dataset_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/dataset_stats.png)
 
-### 3. Experiment Analysis
+---
+### 2. Experiment Analysis
 
 As a preprocessing step the item descriptions and the diagnosis were blended and tokenized. I also remmoved some duplicated instances along with a couple of duplicated instances with different preventive flag values which I called contradictions and would act as noise for the classification. 
 Another factor that wasn't relevant to the prediction was the pet name on the item's description. 
@@ -107,7 +103,7 @@ The figure (above) shows the AUC score over the number of features and the red l
 The best nFeats value came out to be 3550. I did another test but this time with a training/validation split of 80%:20% (a rule of thumb) and the model yield a higher score for 4200 features.
 
 ---
-### 5. Baseline vs Tuned models
+### 3. Baseline vs Tuned models
 
 
 The figure below shows the score comparison between the selected classifiers (exp1) with default parameters vs with tuned parameters (exp2): 
@@ -132,8 +128,7 @@ fig.savefig(path+'/graphics/baselineVsOptimized.png', dpi=fig.dpi)
 There's an improvement on the AUC score of 1% using the tuned classifiers. 
 
 ---
-
-### 7. Results
+### 4. Results
 
 ```python
 fig, axarr = plt.subplots(1,2,figsize=(15,4))
@@ -145,6 +140,6 @@ fig.savefig(path+'/graphics/TrainValRoCurve.png', dpi=fig.dpi)
 From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfitting. 
 Joining the validation set with the training set (to get the maximum samples possible) augmented the average precision by 0.01
 ---
-### 9. Conclusion
+### 5. Conclusion
 
-The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. To compensate the class imbalance, I would have considered including more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check out the option of finding Word2vecs that could be clustered in each class. 
+The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. To compensate the class imbalance, I would have considered including more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check the option of finding Word2vecs that could be clustered in each class. 
