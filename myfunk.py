@@ -834,11 +834,11 @@ def plot_dimensionality_series(f, axes, df1, cols):
     for i,ax in enumerate(axes):
         if i%2==0:
             c = [p for p in df1.Phase.unique() if p.startswith('Tr')]
-            ax.set_title('Training')
-            ax.set_ylabel(cols[i])
+            ax.set_title('Training', fontsize=22)
+            ax.set_ylabel(cols[i], fontsize=20)
         else:
             c = [p for p in df1.Phase.unique() if p.startswith('Val')]
-            ax.set_title('Validation')
+            ax.set_title('Validation', fontsize=22)
 
         df2 = df1.pivot(index='nFeats', columns='Phase', values=cols[i])
 
@@ -855,7 +855,8 @@ def plot_dimensionality_series(f, axes, df1, cols):
         ax.grid()
 
         if i < 2 or i > 13:
-            ax.legend(loc = 'lower left', fontsize=14, framealpha=0.3, fancybox=True)
+            ax.legend(loc = 'lower left', fontsize=15, framealpha=0.3, fancybox=True)
+            ax.set_xlabel('# Features',fontsize=20)
         else:
             ax.get_legend().remove()
             ax.set_xlabel('')

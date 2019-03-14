@@ -4,7 +4,6 @@
 
 Description:
 - Use the data contained in p2_data.csv to build a binary classifier to predict the “PreventiveFlag” label using the text features provided. 
-- This model can be used to automate the detection of ineligible line items. 
 
 ### Files: 
 - The data folder has the csv files provided by source. 
@@ -150,12 +149,15 @@ fig.savefig(path+'/graphics/TrainValRoCurve.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/TrainValRoCurve.png)
 
-From the Roc curve above it's a good thing that the scores on both sets are pretty much alike, thus it is less likely the model is overfitting. 
-Joining the validation set with the training set (to get the maximum samples possible) augmented the average precision by 0.01
+From the ROC curve (TPR vs FPR) above, it's shown that the scores on both (Validation and Training) sets are pretty much alike, thus it is less likely the model is overfitting.
+
+The true positive rate (TPR or Recall) in the vertical axis almost reaches 0.8 with an almost non existing false positives. However, if we care about maximizing true positives, I will have to decrease the cut-off. This way more events will be classified as class 1, some will be true ones however the false positive rate will also increase and 20% more will be false positives. This is the business decision.
 
 ---
 ### 5. Conclusion and future work
 
-The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. To compensate the class imbalance, I attempted to ensemble different resampled datasets. This consisted in dividing the instances of class 1 in 3 unequal segments where each segment would be concatenated with all of the class 0 (the minority) instances and assign a classifyier to them. However that didnt improve the baseline's score. Another option could have been to include more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check the option of finding Word2vecs that could be clustered for each class. 
+The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. But it is important to know that the more data samples we have, the less likely the model will tend to overfit. 
+
+To compensate the class imbalance, I attempted to ensemble different resampled datasets. This consisted in dividing the instances of class 1 in 3 unequal segments where each segment would be concatenated with all of the class 0 (the minority) instances and assign a classifyier to them. However that didnt improve the baseline's score. Another option could have been to include more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check the option of finding Word2vecs that could be clustered for each class. 
 
 On another note, the duplicates affected positively in the classification. In the dataset with (said) outliers and duplicates, the validation score showed the highest AUC as well as the rest of the metrics. However in the final classification where the validation set is merged with the training data, the removal of outliers showed to have the highest AUC score and the recall of the minority class. 
