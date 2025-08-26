@@ -1,9 +1,17 @@
 # NLP analysis and classification of a dataset of claims
 ---
-### Goal
+### Executive Summary: 
+This project applies natural language processing (NLP) techniques to classify claims data using text features. A binary classifier was developed to predict the PreventiveFlag label from descriptions and diagnoses. The workflow included exploratory data analysis, text preprocessing, feature engineering with tf-idf, and model evaluation across multiple machine learning algorithms.
 
-Description:
-- Use the data contained in p2_data.csv to build a binary classifier to predict the “PreventiveFlag” label using the text features provided. 
+Key findings:
+- The dataset contained over 6,000 unique words after preprocessing.
+- Gaussian Naïve Bayes, AdaBoost, and Decision Trees performed best under different feature and n-gram settings.
+- Optimized classifiers improved the AUC score by ~1% compared to baseline models.
+- Removing extreme outliers improved generalization, while duplicates unexpectedly enhanced performance.
+The results highlight the trade-offs between feature dimensionality, n-gram selection, and classifier choice. Future work may explore advanced embeddings (e.g., Word2Vec) and more effective strategies for handling class imbalance.
+
+### Description:
+- Use the data in p2_data.csv to build a binary classifier that predicts the PreventiveFlag label using the provided text features.
 
 ### Files: 
 - The data folder has the csv files provided by source. 
@@ -29,13 +37,13 @@ Description:
 ---
 ### 1. Dataset and EDA
 
-The dataset is composed of 11,000 rows and 3 columns where 2 are of type text and the 3rd is the target represented in float values of 0.0 and 1.0 as shown below: 
+The dataset consists of 11,000 rows and three columns: two text columns and one target column represented by float values of 0.0 and 1.0, as shown below: 
 
 ![**Figure. **](graphics/dataframe.png)
 
-An initial analysis showed the dataset to be composed of: 
-- 4541 different words, numbers and symbols in the Item Description column and 
-- 2029 different words, numbers and symbols in the Diagnosis column. 
+An initial analysis revealed that the dataset contained: 
+- 4,541 unique words, numbers, and symbols in the Item Description column 
+- 2,029 unique words, numbers, and symbols in the Diagnosis column.
 
 #### Statistics for samples of class 1
 
@@ -54,7 +62,7 @@ stats_class(data, f, axarr, 0.0)
 f.savefig(path+'/graphics/class0_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/class0_stats.png)
-In the Item descritpion field for class 0 (top row), have a normal like distribution. The diagnosis field however has a few outliers with a character length exceeding 200. Some with over more than 6 sentences and words above 50 count. They proved later to affect the prediction negatively, so I removed them.
+In the Item description field for class 0 (top row), have a normal-like distribution. The diagnosis field, however, has a few outliers with a character length exceeding 200. Some with more than 6 sentences and words above 50 count. They proved later to affect the prediction negatively, so I removed them.
 
 #### Statistics for the whole dataset
 ```python
@@ -64,19 +72,19 @@ f.savefig(path+'/graphics/dataset_stats.png', dpi=f.dpi)
 ```
 ![**Figure. **](graphics/dataset_stats.png)
 
-An unpaired t-test between the 2 classes' distributions asserted that there is no significant difference. 
+An unpaired t-test between the two class distributions confirmed that there was no significant difference.
 
 ---
 ### 2. Experiment Analysis
 
-As a preprocessing step the item descriptions and the diagnosis were merged and tokenized. I also remmoved some duplicated instances along with a couple of duplicated instances with different preventive flag values which I called contradictions and would act as noise for the classification. 
-Another factor that wasn't relevant to the prediction was the pet name on the item's description. 
+As a preprocessing step, the item descriptions and diagnoses were merged and tokenized. Duplicated instances were removed, along with a few duplicates that had conflicting PreventiveFlag values. These contradictions were treated as noise for classification.
+Additionally, pet names in the item descriptions were deemed irrelevant for prediction and removed.
 
-After text cleaning and removing stop words, there were over 6.3 thousand words to work with!
+After text cleaning and stop word removal, over 6,300 unique words remained.
 
-The next step included feature engineering. I converted the text corpus into a matrix of token counts (using CountVectorizer), then transformed it into a normalized tf-idf representation (with tf-idf transformer). I used as feature selection method the chi-square test since it measures dependence between stochastic variables, so using this function “weeds out” the features that are the most likely to be independent of class and therefore irrelevant for classification.
+The next step involved feature engineering. The text corpus was converted into a matrix of token counts (using CountVectorizer) and then transformed into a normalized tf-idf representation (using a tf-idf transformer). Feature selection was performed using the chi-square test, which identifies features most dependent on class membership and removes irrelevant ones.
 
-After that, I did a series of tests by training several classifiers from Scikit-Learn library (with default parameters) over different number of features, n-grams, stemming, lemmatizing or both. The decision on whether to stem or not came from the fact that stemming gave higher performance scores. The training and validation splitting ratio was 70%:30% and the performance metric is the area under the curve (AUC) since it tells how much model is capable of distinguishing between classes and accuracy cannot show a reliable score due to the fact that the dataset is imbalanced. 
+Several classifiers from the Scikit-learn library (with default parameters) were trained across variations of feature counts, n-grams, stemming, lemmatization, or both. Stemming was ultimately selected, as it yielded higher performance scores. Data was split into training and validation sets (70%:30%). The performance metric was the Area Under the Curve (AUC), as it better captures class separation ability than accuracy, particularly given the imbalanced dataset.
 
 Python code to reproduce this figure:
 ```python
@@ -85,14 +93,14 @@ fig = nGrams_distribution(results, 'Val', 5, 'AUC', 1)
 fig.savefig(path+'/graphics/StemmingAUCdistributions.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/StemmingAUCdistributions.png)
-The figure above shows the distribution of the performance score AUC of each of the classifiers. I divided the results by n-grams and by their dimensionality divided by 2 quartiles (low < 0.3, mid and high > 0.6). The 3rd column (showing the distributions with the number of features above 4000) doesn't show the distribution with 1-grams because the maximum number of 1-grams extracted from the training set was below the limit of 4000. However the number of combinations with 2-grams and 3-grams exceeded that limit. 
+The figure above shows the AUC score distributions for each classifier, grouped by n-grams and feature dimensionality quartiles (low < 0.3, mid, and high > 0.6). The third column (features above 4,000) does not include 1-grams because the training set contained fewer than 4,000 1-grams. However, the combinations of 2-grams and 3-grams exceeded this threshold.
 
-The random forest (RF) along with the SVM with gradient descent (SGD) perform best at low dimensions and 1-grams. The decision trees (DT) classifier outperforms them but its performance decreases as the dimensionality increases. 
+- Random Forest (RF) and Stochastic Gradient Descent (SGD) classifiers performed best at lower dimensions and 1-grams.
+- Decision Trees (DT) initially outperformed RF and SGD but declined in performance as dimensionality increased.
+- Gaussian Naïve Bayes (GNB) stabilized around an AUC of ~0.858 with 2-grams and maintained competitive performance (>80%).
+- AdaBoost (AB) showed strong performance in lower dimensions and improved further with higher n-grams.
 
-The Gaussian NB (GNB) classifier, on the other hand, stabilizes around .858 (AUC score) and 2-grams as the number of dimensions increase. This clf also shows a competitive AUC score above 80%. 
-As for the Adaboost classifier (AB), shows a high score in the low dimensions with the more n-grams the better. 
-
-So there is a tradeoff between the number of features and the number of ngrams. The RF and SGD showing low performance (below 80%) must leave the race. The GNB performs better with higher dimensionality. AB performs better with higher n-grams and DT performs better with a low dimensionality and low ngrams. A balanced model with a set of these last 3 classifiers could have as parameters n-grams=2 and a mid-size dimensionality. 
+This illustrates a trade-off between the number of features and the number of n-grams. RF and SGD, performing below 80%, were eliminated. GNB performed better with higher dimensionality, AB with higher n-grams, and DT with lower dimensionality and n-grams. A balanced model incorporating these three classifiers could use 2-grams with mid-level dimensionality.
 
 Python code to reproduce this figure:
 ```python
@@ -110,17 +118,15 @@ plot_dimensionality_series(fig, axes, res, cols)
 fig.savefig(path+'/graphics/auc_over_dimensions.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/auc_over_dimensions.png)
-The figure (above) shows the AUC score over the number of features and the red line is a normalized sum of those scores. Since I chose the mid section of amount of features (2350-3850) the classifiers show a peak on ensemble score at 3100. I used this value as a reference to compare with the voting score of the remaining values of the number of features (nFeats)
-
-The best nFeats value came out to be 3550. I did another test but this time with a training/validation split of 80%:20% (a rule of thumb) and the model yield a higher score for 4200 features.
+The figure above shows AUC scores across feature counts. The red line indicates a normalized sum of the scores. Within the mid-range of features (2,350–3,850), classifiers peaked at 3,100 features. The optimal value was determined to be 3,550 features. When tested again with an 80%:20% train-validation split (a common rule of thumb), the model achieved its highest score with 4,200 features.
 
 ---
 ### 3. Baseline vs Tuned models
 
 
-The figure below shows the score comparison between the selected classifiers (exp1) with default parameters vs with tuned parameters (exp2): 
+The figure above compares the baseline classifiers (exp1, with default parameters) against the tuned classifiers (exp2). The tuned models achieved a 1% improvement in AUC score. 
 ```python 
-## --- Training and validation of Basline and Tuned Classifiers
+## --- Training and validation of Baseline and Tuned Classifiers
 # These 2 functions will train the data and get the individual scores for each classifier in the set
 # ETA ~ 14min
 df_baseline = trupanion(data, clf_base, flags, 2)  # 7min
@@ -149,15 +155,15 @@ fig.savefig(path+'/graphics/TrainValRoCurve.png', dpi=fig.dpi)
 ```
 ![**Figure. **](graphics/TrainValRoCurve.png)
 
-From the ROC curve (TPR vs FPR) above, it's shown that the scores on both (Validation and Training) sets are pretty much alike, thus it is less likely the model is overfitting.
+The ROC curve (TPR vs. FPR) above shows that the validation and training scores are nearly identical, suggesting the model is unlikely to be overfitting.
 
-The true positive rate (TPR or Recall) in the vertical axis almost reaches 0.8 with an almost non existing false positives. However, if we care about maximizing true positives, I will have to decrease the cut-off. This way more events will be classified as class 1, some will be true ones however the false positive rate will also increase and 20% more will be false positives. This is the business decision.
+The true positive rate (TPR, or Recall) on the vertical axis approaches 0.8, with almost no false positives. However, if maximizing true positives is the priority, lowering the decision threshold would classify more events as class 1. While this would increase the number of true positives, it would also raise the false positive rate, with about 20% more cases incorrectly classified. This trade-off represents a business decision.
 
 ---
 ### 5. Conclusion and future work
 
-The AUC score lowered as expected since more variance was added thanks to the data samples from the validation set. But it is important to know that the more data samples we have, the less likely the model will tend to overfit. 
+The AUC score decreased as expected when incorporating more variance from the validation set. Nevertheless, a larger dataset reduces the likelihood of overfitting.
 
-To compensate the class imbalance, I attempted to ensemble different resampled datasets. This consisted in dividing the instances of class 1 in 3 unequal segments where each segment would be concatenated with all of the class 0 (the minority) instances and assign a classifyier to them. However that didnt improve the baseline's score. Another option could have been to include more features pertaining to the minority class and even expand the set with a higher value for n-grams. Also if I had more free time to work on this project, I'd check the option of finding Word2vecs that could be clustered for each class. 
+To address class imbalance, I attempted to ensemble resampled datasets. Class 1 instances were divided into three unequal segments, each concatenated with all class 0 instances, and individual classifiers were assigned to them. However, this approach did not improve baseline performance. Alternative strategies could include engineering additional features for the minority class or increasing feature dimensionality with higher-order n-grams. With additional time, I would also consider applying Word2Vec embeddings and clustering them by class.
 
-On another note, the duplicates affected positively in the classification. In the dataset with (said) outliers and duplicates, the validation score showed the highest AUC as well as the rest of the metrics. However in the final classification where the validation set is merged with the training data, the removal of outliers showed to have the highest AUC score and the recall of the minority class. 
+Interestingly, duplicate entries had a positive effect on classification. In the dataset containing duplicates and outliers, validation scores were highest across AUC and other metrics. However, in the final classification—where the validation set was merged with the training set—removing outliers resulted in the highest AUC and recall for the minority class.
